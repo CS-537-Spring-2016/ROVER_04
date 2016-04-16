@@ -34,7 +34,7 @@ public class ROVER_99 {
 
 	public ROVER_99() {
 		// constructor
-		System.out.println("ROVER_99 rover object constructed");
+		System.out.println("ROVER_99 rover object constructed"); //add
 		rovername = "ROVER_99";
 		SERVER_ADDRESS = "localhost";
 		// this should be a safe but slow timer value
