@@ -164,7 +164,7 @@ public class ROVER_04 {
 						blocked = true;
 					} else {
 						// request to server to move
-						out.println("MOVE S");
+						out.println("MOVE South");
 						//System.out.println("ROVER_04 request move S");
 					}
 					
