@@ -154,7 +154,7 @@ public class SwarmServer {
                     	break;
                     }
                 }
-                
+                //some random comment
                 // make and instantiate a Rover object connected to this thread
                 RoverName rname = RoverName.getEnum(roverNameString); 
                 System.out.println("SWARM: make a rover name " + rname);
