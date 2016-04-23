@@ -180,7 +180,7 @@ public class ROVER_04 {
 						blocked = true;
 					} else {
 						// request to server to move
-						out.println("MOVE N");
+						out.println("MOVE North");
 						//System.out.println("ROVER_04 request move N");
 					}					
 				}
