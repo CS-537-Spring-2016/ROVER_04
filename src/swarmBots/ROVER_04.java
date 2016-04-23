@@ -141,7 +141,7 @@ public class ROVER_04 {
 			// try moving east 5 block if blocked
 			if (blocked) {
 				for (int i = 0; i < 5; i++) {
-					out.println("MOVE E");
+					out.println("MOVE East");
 					//System.out.println("ROVER_04 request move E");
 					Thread.sleep(300);
 				}
