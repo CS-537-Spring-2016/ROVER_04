@@ -155,6 +155,7 @@ public class ROVER_04 {
 				int centerIndex = (scanMap.getEdgeSize() - 1)/2;
 				// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
 
+				
 				if (goingSouth) {
 					// check scanMap to see if path is blocked to the south
 					// (scanMap may be old data by now)
