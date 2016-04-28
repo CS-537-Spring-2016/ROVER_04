@@ -200,7 +200,7 @@ public class ROVER_04 {
 									|| scanMapTiles[centerIndex -1][centerIndex].getTerrain() == Terrain.NONE) {
 								
 									// request to server to move
-									out.println("MOVE S");
+									out.println("MOVE SOUTH");
 									Thread.sleep(1100);
 									//System.out.println("ROVER_04 request move S");
 									System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
@@ -212,7 +212,7 @@ public class ROVER_04 {
 							}
 							} else {
 								// request to server to move
-								out.println("MOVE W");
+								out.println("MOVE WEST");
 								//System.out.println("ROVER_04 request move W");
 								Thread.sleep(1100);
 								System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
