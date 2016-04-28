@@ -76,8 +76,7 @@ public class ROVER_04 {
 					break;
 				}
 			}
-	
-			
+		
 			// ********* Rover logic setup *********
 			
 			String line = "";
