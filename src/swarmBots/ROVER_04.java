@@ -252,7 +252,7 @@ public class ROVER_04 {
 				} else {
 	
 					
-	
+	// this is south bound
 					if (goingSouth) {
 						// check scanMap to see if path is blocked to the south
 						if (scanMapTiles[centerIndex][centerIndex +1].getHasRover() 
@@ -261,6 +261,7 @@ public class ROVER_04 {
 							blocked = true;
 						} else {
 							// request to server to move
+							
 							out.println("MOVE S");
 							//System.out.println("ROVER_04 request move S");
 							System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
