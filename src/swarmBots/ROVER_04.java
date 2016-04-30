@@ -226,7 +226,7 @@ public class ROVER_04 {
 							
 						} else {
 							// request to server to move
-							out.println("MOVE E");
+							out.println("MOVE EAST");
 							//System.out.println("ROVER_04 request move E");
 							Thread.sleep(1100);
 
