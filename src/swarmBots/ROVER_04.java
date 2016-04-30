@@ -226,7 +226,7 @@ public class ROVER_04 {
 							
 						} else {
 							// request to server to move
-							out.println("MOVE EAST");
+							out.println("MOVE E");
 							//System.out.println("ROVER_04 request move E");
 							Thread.sleep(1100);
 
@@ -261,7 +261,7 @@ public class ROVER_04 {
 							blocked = true;
 						} else {
 							// request to server to move
-							out.println("MOVE SOUTH");
+							out.println("MOVE S");
 							//System.out.println("ROVER_04 request move S");
 							System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
 							if (!scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
@@ -285,7 +285,7 @@ public class ROVER_04 {
 							blocked = true;
 						} else {
 							// request to server to move
-							out.println("MOVE NORTH");
+							out.println("MOVE N");
 							
 							//System.out.println("ROVER_04 request move N");
 							System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
