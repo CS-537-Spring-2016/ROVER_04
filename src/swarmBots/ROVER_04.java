@@ -252,7 +252,7 @@ public class ROVER_04 {
 				} else {
 	
 					
-	// this is south bound
+	// this is south 
 					if (goingSouth) {
 						// check scanMap to see if path is blocked to the south
 						if (scanMapTiles[centerIndex][centerIndex +1].getHasRover() 
