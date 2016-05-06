@@ -170,7 +170,7 @@ public class ROVER_04 {
 		
 	
 				// ***** do a SCAN *****
-
+// We have to make some changes in this portion.
 				// gets the scanMap from the server based on the Rover current location
 				loadScanMapFromSwarmServer();
 				// prints the scanMap to the Console output for debug purposes
