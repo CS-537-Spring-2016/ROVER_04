@@ -1,6 +1,7 @@
 package swarmBots;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -21,7 +22,6 @@ import common.Coord;
 import common.MapTile;
 import common.ScanMap;
 import common.Group;
-
 import enums.Terrain;
 import enums.Science;
 
@@ -43,13 +43,13 @@ public class ROVER_04 {
 	String SERVER_ADDRESS = "localhost";
 	static final int PORT_ADDRESS = 9537;
 	
-	List<Socket> outputSockets = new ArrayList<Socket>();
+	List<Socket> output_Sockets = new ArrayList<Socket>();
 
     //objects contain each rover IP, port, and name
     List<Group> blue = new ArrayList<Group>();
 
     // every science detected will be added in to this set
-    Set<Coord> science_discovered = new HashSet<Coord>();
+    Set<Coord> science_Store = new HashSet<Coord>();
 
     // this set contains all the science the ROVERED has shared
     // thus whatever thats in science_collection that is not in display_science
@@ -61,7 +61,8 @@ public class ROVER_04 {
     
     // Your ROVER is going to listen for connection with this
     ServerSocket listenSocket;
-
+    Coord Rover_Current_Loc = null;
+	Coord Rover_Previous_Loc = null;
 	public ROVER_04() {
 		// constructor
 		System.out.println("ROVER_04 rover object constructed");
@@ -106,7 +107,7 @@ public class ROVER_04 {
                 }
             } while (socket == null);
             
-            outputSockets.add(socket);
+            output_Sockets.add(socket);
             System.out.println(socket.getPort() + " " + socket.getInetAddress());
         }
 
@@ -209,7 +210,7 @@ public class ROVER_04 {
 
 			boolean stuck = false; // just means it did not change locations between requests,
 									// could be velocity limit or obstruction etc.
-			boolean blocked = false;
+			boolean blocked = true;
 	
 			String[] cardinals = new String[4];
 			cardinals[0] = "N";
@@ -218,8 +219,8 @@ public class ROVER_04 {
 			cardinals[3] = "W";
 	
 			String currentDir = cardinals[0];
-			Coord currentLoc = null;
-			Coord previousLoc = null;
+			//Coord Rover_Current_Loc = null;
+			//Coord Rover_Previous_Loc = null;
 	
 
 			/**
@@ -237,13 +238,13 @@ public class ROVER_04 {
 	            }
 				if (line.startsWith("LOC")) {
 					// loc = line.substring(4);
-					currentLoc = extractLocationFromString(line);
+					Rover_Current_Loc = extractLocationFromString(line);
 					
 				}
-				System.out.println(rovername + " currentLoc at start: " + currentLoc);
+				System.out.println(rovername + " currentLoc at start: " + Rover_Current_Loc);
 				
 				// after getting location set previous equal current to be able to check for stuckness and blocked later
-				previousLoc = currentLoc;		
+				Rover_Previous_Loc = Rover_Current_Loc;		
 				
 				
 
@@ -269,6 +270,9 @@ public class ROVER_04 {
 				MapTile[][] scanMapTiles = scanMap.getScanMap();
 				int centerIndex = (scanMap.getEdgeSize() - 1)/2;
 				// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
+				
+				detectMineral(scanMap.getScanMap());
+				shareScience();
 				// try moving east 5 block if blocked
 				if (blocked) {
 				
@@ -385,13 +389,13 @@ public class ROVER_04 {
 					line = "";
 				}
 				if (line.startsWith("LOC")) {
-					currentLoc = extractLocationFromString(line);
+					Rover_Current_Loc = extractLocationFromString(line);
 					
 				}
 	
 	
 				// test for stuckness
-				stuck = currentLoc.equals(previousLoc);
+				stuck = Rover_Current_Loc.equals(Rover_Previous_Loc);
 	
 				//System.out.println("ROVER_04 stuck test " + stuck);
 				System.out.println("ROVER_04 blocked test " + blocked);
@@ -430,7 +434,43 @@ public class ROVER_04 {
 		}
 	}
 	
+	public void move(String direction) {
+		out.println("MOVE " + direction);
+	}
+	
+	/**
+	 * iterate through a scan map to find a tile with radiation. get the
+	 * adjusted (absolute) coordinate of the tile and added into a hash set
+	 */
+	private void detectMineral(MapTile[][] scanMapTiles) {
+		for (int x = 0; x < scanMapTiles.length; x++) {
+			for (int y = 0; y < scanMapTiles[x].length; y++) {
+				MapTile mapTile = scanMapTiles[x][y];
+				if (mapTile.getScience() == Science.MINERAL) {
+					int tileX = Rover_Current_Loc.xpos + (x - 5);
+					int tileY = Rover_Current_Loc.ypos + (y - 5);
+					Coord coord = new Coord(mapTile.getTerrain(), mapTile.getScience(), tileX, tileY);
+					science_Store.add(coord);
+				}
+			}
+		}
+	}
 
+	
+	 // Write to each rover the coords of a tile that contains radiation.
+	public void shareScience() {
+		for (Coord c : science_Store) {
+			if (!displayed_science.contains(c)) {
+				for (Socket s : output_Sockets)
+					try {
+						new DataOutputStream(s.getOutputStream()).writeBytes(c.toString() + "\r\n");
+					} catch (Exception e) {
+
+					}
+				displayed_science.add(c);
+			}
+		}
+	}
 	// method to retrieve a list of the rover's EQUIPMENT from the server
 	private ArrayList<String> getEquipment() throws IOException {
 		//System.out.println("ROVER_04 method getEquipment()");
