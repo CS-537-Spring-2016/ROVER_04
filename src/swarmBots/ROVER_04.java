@@ -1,18 +1,13 @@
 package swarmBots;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -21,11 +16,7 @@ import com.google.gson.reflect.TypeToken;
 import common.Coord;
 import common.MapTile;
 import common.ScanMap;
-import common.Group;
 import enums.Terrain;
-import enums.Science;
-
-
 
 /**
  * The seed that this program is built on is a chat program example found here:
@@ -42,27 +33,7 @@ public class ROVER_04 {
 	int sleepTime;
 	String SERVER_ADDRESS = "localhost";
 	static final int PORT_ADDRESS = 9537;
-	
-	List<Socket> output_Sockets = new ArrayList<Socket>();
 
-    //objects contain each rover IP, port, and name
-    List<Group> blue = new ArrayList<Group>();
-
-    // every science detected will be added in to this set
-    Set<Coord> science_Store = new HashSet<Coord>();
-
-    // this set contains all the science the ROVERED has shared
-    // thus whatever thats in science_collection that is not in display_science
-    // are "new" and "unshared"
-    Set<Coord> displayed_science = new HashSet<Coord>();
-    
-    // ROVER current location
-    Coord roverLoc;
-    
-    // Your ROVER is going to listen for connection with this
-    ServerSocket listenSocket;
-    Coord Rover_Current_Loc = null;
-	Coord Rover_Previous_Loc = null;
 	public ROVER_04() {
 		// constructor
 		System.out.println("ROVER_04 rover object constructed");
@@ -79,59 +50,6 @@ public class ROVER_04 {
 		SERVER_ADDRESS = serverAddress;
 		sleepTime = 200; // in milliseconds - smaller is faster, but the server will cut connection if it is too small
 	}
-	
-	/**
-     * Connect each socket on a separate thread. It will try until it works.
-     * When socket is created, save it to a LIST
-     */
-    class RoverComm implements Runnable {
-
-        String ip;
-        int port;
-        Socket socket;
-
-        public RoverComm(String ip, int port) {
-            this.ip = ip;
-            this.port = port;
-        }
-
-        @Override
-        public void run() {
-            do {
-                try {
-                    socket = new Socket(ip, port);
-                } catch (UnknownHostException e) {
-
-                } catch (IOException e) {
-
-                }
-            } while (socket == null);
-            
-            output_Sockets.add(socket);
-            System.out.println(socket.getPort() + " " + socket.getInetAddress());
-        }
-
-    }
-    
-    /**
-     * For connection add all the blue group rovers (ip , port#) into a List
-     */
-    public void initConnection() {
-        // dummy value # 1
-        blue.add(new Group("Dummy Group #1", "localhost", 53799));
-
-        // blue rooster
-        blue.add(new Group("GROUP_01", "localhost", 53701));
-        blue.add(new Group("GROUP_02", "localhost", 53702));
-        blue.add(new Group("GROUP_03", "localhost", 53703));
-        blue.add(new Group("GROUP_05", "localhost", 53705));
-        blue.add(new Group("GROUP_06", "localhost", 53706));
-        blue.add(new Group("GROUP_07", "localhost", 53707));
-        blue.add(new Group("GROUP_08", "localhost", 53708));
-        blue.add(new Group("GROUP_09", "localhost", 53709));
-    }
-
-	
 
 	/**
 	 * Connects to the server then enters the processing loop.
@@ -210,7 +128,7 @@ public class ROVER_04 {
 
 			boolean stuck = false; // just means it did not change locations between requests,
 									// could be velocity limit or obstruction etc.
-			boolean blocked = true;
+			boolean blocked = false;
 	
 			String[] cardinals = new String[4];
 			cardinals[0] = "N";
@@ -219,8 +137,8 @@ public class ROVER_04 {
 			cardinals[3] = "W";
 	
 			String currentDir = cardinals[0];
-			//Coord Rover_Current_Loc = null;
-			//Coord Rover_Previous_Loc = null;
+			Coord currentLoc = null;
+			Coord previousLoc = null;
 	
 
 			/**
@@ -238,13 +156,13 @@ public class ROVER_04 {
 	            }
 				if (line.startsWith("LOC")) {
 					// loc = line.substring(4);
-					Rover_Current_Loc = extractLocationFromString(line);
+					currentLoc = extractLocationFromString(line);
 					
 				}
-				System.out.println(rovername + " currentLoc at start: " + Rover_Current_Loc);
+				System.out.println(rovername + " currentLoc at start: " + currentLoc);
 				
 				// after getting location set previous equal current to be able to check for stuckness and blocked later
-				Rover_Previous_Loc = Rover_Current_Loc;		
+				previousLoc = currentLoc;		
 				
 				
 
@@ -270,65 +188,59 @@ public class ROVER_04 {
 				MapTile[][] scanMapTiles = scanMap.getScanMap();
 				int centerIndex = (scanMap.getEdgeSize() - 1)/2;
 				// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
-				
-				detectMineral(scanMap.getScanMap());
-				shareScience();
 				// try moving east 5 block if blocked
 				if (blocked) {
 				
-					//for (int i = 0; i < 5; i++) {
-						if (scanMapTiles[centerIndex +1][centerIndex].getHasRover() 
-								|| scanMapTiles[centerIndex +1][centerIndex].getTerrain() == Terrain.SAND
-								|| scanMapTiles[centerIndex +1][centerIndex].getTerrain() == Terrain.NONE) {
-							if (scanMapTiles[centerIndex -1][centerIndex].getHasRover() 
-									|| scanMapTiles[centerIndex -1][centerIndex].getTerrain() == Terrain.SAND
-									|| scanMapTiles[centerIndex -1][centerIndex].getTerrain() == Terrain.NONE) {
-								
+					for (int i = 0; i < 5; i++) {
+						if (!scanMapTiles[centerIndex +1][centerIndex].getHasRover() 
+								&& scanMapTiles[centerIndex +1][centerIndex].getTerrain() != Terrain.SAND
+								&& scanMapTiles[centerIndex +1][centerIndex].getTerrain() != Terrain.NONE) {
+							
 									// request to server to move
-									out.println("MOVE S");
+									out.println("MOVE E");
 									Thread.sleep(1100);
 									//System.out.println("ROVER_04 request move S");
 									System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
-									if (!scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+									if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
 										System.out.println("ROVER_04 request GATHER");
 										out.println("GATHER");
-										
+									break;	
 								}
-							} else {
-								// request to server to move
-								out.println("MOVE W");
-								//System.out.println("ROVER_04 request move W");
-								Thread.sleep(1100);
-								System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
-								if (!scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
-									System.out.println("ROVER_04 request GATHER");
-									out.println("GATHER");
-									
-							}
-							}
+							} else if (!scanMapTiles[centerIndex][centerIndex +1].getHasRover() 
+									&& scanMapTiles[centerIndex][centerIndex +1].getTerrain() != Terrain.SAND
+									&& scanMapTiles[centerIndex][centerIndex +1].getTerrain() != Terrain.NONE) {
+								
+										// request to server to move
+										out.println("MOVE S");
+										Thread.sleep(1100);
+										//System.out.println("ROVER_04 request move S");
+										System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
+										if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+											System.out.println("ROVER_04 request GATHER");
+											out.println("GATHER");
+											
+									} 
 							
 						} else {
 							
 							// request to server to move
-							out.println("MOVE E");
+							out.println("MOVE W");
 							//System.out.println("ROVER_04 request move E");
 							Thread.sleep(1100);
-
+							//System.out.println("ROVER_04 request move S");
 							System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
-							if (!scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+							if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
 								System.out.println("ROVER_04 request GATHER");
 								out.println("GATHER");
 								
-						}
+						} 
 					}
-					//}
+					}
 					
 					blocked = false;
 					//reverses direction after being blocked
 			
-					if(goingNorth)
 					goingSouth = !goingSouth;
-					goingNorth = !goingNorth;
 					
 					
 
@@ -346,25 +258,22 @@ public class ROVER_04 {
 							// request to server to move
 							out.println("MOVE S");
 							//System.out.println("ROVER_04 request move S");
+							Thread.sleep(1100);
+							//System.out.println("ROVER_04 request move S");
 							System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
-							if (!scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+							if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
 								System.out.println("ROVER_04 request GATHER");
 								out.println("GATHER");
 								
-						}
+						} 
 						}
 						
 					
 					
-					}else {
-						// check scanMap to see if path is blocked to the north
-						//System.out.println("ROVER_04 scanMapTiles[2][1].getHasRover() " + scanMapTiles[2][1].getHasRover());
-						//System.out.println("ROVER_04 scanMapTiles[2][1].getTerrain() " + scanMapTiles[2][1].getTerrain().toString());
-						
+					} else {
 						if (scanMapTiles[centerIndex][centerIndex -1].getHasRover() 
 								|| scanMapTiles[centerIndex][centerIndex -1].getTerrain() == Terrain.SAND
 								|| scanMapTiles[centerIndex][centerIndex -1].getTerrain() == Terrain.NONE) {
-							goingNorth = true;
 							blocked = true;
 						} else {
 							// request to server to move
@@ -372,11 +281,14 @@ public class ROVER_04 {
 							
 							//System.out.println("ROVER_04 request move N");
 							System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
-							if (!scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+							Thread.sleep(1100);
+							//System.out.println("ROVER_04 request move S");
+							System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
+							if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
 								System.out.println("ROVER_04 request GATHER");
 								out.println("GATHER");
 								
-						}
+							}
 						}					
 					}
 				}
@@ -389,13 +301,13 @@ public class ROVER_04 {
 					line = "";
 				}
 				if (line.startsWith("LOC")) {
-					Rover_Current_Loc = extractLocationFromString(line);
+					currentLoc = extractLocationFromString(line);
 					
 				}
 	
 	
 				// test for stuckness
-				stuck = Rover_Current_Loc.equals(Rover_Previous_Loc);
+				stuck = currentLoc.equals(previousLoc);
 	
 				//System.out.println("ROVER_04 stuck test " + stuck);
 				System.out.println("ROVER_04 blocked test " + blocked);
@@ -434,43 +346,7 @@ public class ROVER_04 {
 		}
 	}
 	
-	public void move(String direction) {
-		out.println("MOVE " + direction);
-	}
-	
-	/**
-	 * iterate through a scan map to find a tile with radiation. get the
-	 * adjusted (absolute) coordinate of the tile and added into a hash set
-	 */
-	private void detectMineral(MapTile[][] scanMapTiles) {
-		for (int x = 0; x < scanMapTiles.length; x++) {
-			for (int y = 0; y < scanMapTiles[x].length; y++) {
-				MapTile mapTile = scanMapTiles[x][y];
-				if (mapTile.getScience() == Science.MINERAL) {
-					int tileX = Rover_Current_Loc.xpos + (x - 5);
-					int tileY = Rover_Current_Loc.ypos + (y - 5);
-					Coord coord = new Coord(mapTile.getTerrain(), mapTile.getScience(), tileX, tileY);
-					science_Store.add(coord);
-				}
-			}
-		}
-	}
 
-	
-	 // Write to each rover the coords of a tile that contains radiation.
-	public void shareScience() {
-		for (Coord c : science_Store) {
-			if (!displayed_science.contains(c)) {
-				for (Socket s : output_Sockets)
-					try {
-						new DataOutputStream(s.getOutputStream()).writeBytes(c.toString() + "\r\n");
-					} catch (Exception e) {
-
-					}
-				displayed_science.add(c);
-			}
-		}
-	}
 	// method to retrieve a list of the rover's EQUIPMENT from the server
 	private ArrayList<String> getEquipment() throws IOException {
 		//System.out.println("ROVER_04 method getEquipment()");
