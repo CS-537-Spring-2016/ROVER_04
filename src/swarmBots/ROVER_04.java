@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -168,7 +170,7 @@ public class ROVER_04 {
 		
 	
 				// ***** do a SCAN *****
-// We have to make some changes in this portion.
+
 				// gets the scanMap from the server based on the Rover current location
 				loadScanMapFromSwarmServer();
 				// prints the scanMap to the Console output for debug purposes
@@ -198,43 +200,56 @@ public class ROVER_04 {
 									|| scanMapTiles[centerIndex -1][centerIndex].getTerrain() == Terrain.NONE) {
 								
 									// request to server to move
-									out.println("MOVE SOUTH");
+									out.println("MOVE S");
 									Thread.sleep(1100);
 									//System.out.println("ROVER_04 request move S");
 									System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
-									if (!scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+									if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("M")
+											|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("M")
+											|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("C")
+											|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("Y")
+											|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("A")
+											|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("O")) {
 										System.out.println("ROVER_04 request GATHER");
 										out.println("GATHER");
 										
-								
-							}
+								}
 							} else {
 								// request to server to move
-								out.println("MOVE WEST");
+								out.println("MOVE W");
 								//System.out.println("ROVER_04 request move W");
 								Thread.sleep(1100);
 								System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
-								if (!scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+								if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("M")
+										|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("M")
+										|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("C")
+										|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("Y")
+										|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("A")
+										|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("O")) {
 									System.out.println("ROVER_04 request GATHER");
 									out.println("GATHER");
 									
-							
-						}
+							}
 							}
 							
 						} else {
+							
 							// request to server to move
-							out.println("MOVE EAST");
+							out.println("MOVE E");
 							//System.out.println("ROVER_04 request move E");
 							Thread.sleep(1100);
 
 							System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
-							if (!scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+							if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("M")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("M")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("C")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("Y")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("A")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("O")) {
 								System.out.println("ROVER_04 request GATHER");
 								out.println("GATHER");
 								
 						}
-						
 					}
 					}
 					
@@ -250,7 +265,7 @@ public class ROVER_04 {
 				} else {
 	
 					
-	// this is south 
+	
 					if (goingSouth) {
 						// check scanMap to see if path is blocked to the south
 						if (scanMapTiles[centerIndex][centerIndex +1].getHasRover() 
@@ -259,11 +274,15 @@ public class ROVER_04 {
 							blocked = true;
 						} else {
 							// request to server to move
-							
 							out.println("MOVE S");
 							//System.out.println("ROVER_04 request move S");
 							System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
-							if (!scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+							if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("M")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("M")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("C")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("Y")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("A")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("O")) {
 								System.out.println("ROVER_04 request GATHER");
 								out.println("GATHER");
 								
@@ -288,7 +307,12 @@ public class ROVER_04 {
 							
 							//System.out.println("ROVER_04 request move N");
 							System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
-							if (!scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+							if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("M")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("M")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("C")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("Y")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("A")
+									|| scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("O")) {
 								System.out.println("ROVER_04 request GATHER");
 								out.println("GATHER");
 								

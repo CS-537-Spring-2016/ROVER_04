@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import enums.RoverName;
-import enums.Science;
 
 public class RoverLocations {
 	
