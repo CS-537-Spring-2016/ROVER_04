@@ -5,9 +5,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,7 +20,11 @@ import com.google.gson.reflect.TypeToken;
 import common.Coord;
 import common.MapTile;
 import common.ScanMap;
+import common.Group;
 import enums.Terrain;
+import enums.Science;
+
+
 
 /**
  * The seed that this program is built on is a chat program example found here:
@@ -33,6 +41,25 @@ public class ROVER_04 {
 	int sleepTime;
 	String SERVER_ADDRESS = "localhost";
 	static final int PORT_ADDRESS = 9537;
+	
+	List<Socket> outputSockets = new ArrayList<Socket>();
+
+    //objects contain each rover IP, port, and name
+    List<Group> blue = new ArrayList<Group>();
+
+    // every science detected will be added in to this set
+    Set<Coord> science_discovered = new HashSet<Coord>();
+
+    // this set contains all the science the ROVERED has shared
+    // thus whatever thats in science_collection that is not in display_science
+    // are "new" and "unshared"
+    Set<Coord> displayed_science = new HashSet<Coord>();
+    
+    // ROVER current location
+    Coord roverLoc;
+    
+    // Your ROVER is going to listen for connection with this
+    ServerSocket listenSocket;
 
 	public ROVER_04() {
 		// constructor
@@ -50,6 +77,59 @@ public class ROVER_04 {
 		SERVER_ADDRESS = serverAddress;
 		sleepTime = 200; // in milliseconds - smaller is faster, but the server will cut connection if it is too small
 	}
+	
+	/**
+     * Connect each socket on a separate thread. It will try until it works.
+     * When socket is created, save it to a LIST
+     */
+    class RoverComm implements Runnable {
+
+        String ip;
+        int port;
+        Socket socket;
+
+        public RoverComm(String ip, int port) {
+            this.ip = ip;
+            this.port = port;
+        }
+
+        @Override
+        public void run() {
+            do {
+                try {
+                    socket = new Socket(ip, port);
+                } catch (UnknownHostException e) {
+
+                } catch (IOException e) {
+
+                }
+            } while (socket == null);
+            
+            outputSockets.add(socket);
+            System.out.println(socket.getPort() + " " + socket.getInetAddress());
+        }
+
+    }
+    
+    /**
+     * For connection add all the blue group rovers (ip , port#) into a List
+     */
+    public void initConnection() {
+        // dummy value # 1
+        blue.add(new Group("Dummy Group #1", "localhost", 53799));
+
+        // blue rooster
+        blue.add(new Group("GROUP_01", "localhost", 53701));
+        blue.add(new Group("GROUP_02", "localhost", 53702));
+        blue.add(new Group("GROUP_03", "localhost", 53703));
+        blue.add(new Group("GROUP_05", "localhost", 53705));
+        blue.add(new Group("GROUP_06", "localhost", 53706));
+        blue.add(new Group("GROUP_07", "localhost", 53707));
+        blue.add(new Group("GROUP_08", "localhost", 53708));
+        blue.add(new Group("GROUP_09", "localhost", 53709));
+    }
+
+	
 
 	/**
 	 * Connects to the server then enters the processing loop.
@@ -190,7 +270,7 @@ public class ROVER_04 {
 				// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
 				// try moving east 5 block if blocked
 				if (blocked) {
-				
+					
 					for (int i = 0; i < 5; i++) {
 						if (!scanMapTiles[centerIndex +1][centerIndex].getHasRover() 
 								&& scanMapTiles[centerIndex +1][centerIndex].getTerrain() != Terrain.SAND
@@ -239,15 +319,15 @@ public class ROVER_04 {
 					
 					blocked = false;
 					//reverses direction after being blocked
-			
+
 					goingSouth = !goingSouth;
 					
 					
 
 				} else {
-	
+
 					
-	
+
 					if (goingSouth) {
 						// check scanMap to see if path is blocked to the south
 						if (scanMapTiles[centerIndex][centerIndex +1].getHasRover() 
@@ -292,7 +372,7 @@ public class ROVER_04 {
 						}					
 					}
 				}
-	
+
 				// another call for current location
 				out.println("LOC");
 				line = in.readLine();
