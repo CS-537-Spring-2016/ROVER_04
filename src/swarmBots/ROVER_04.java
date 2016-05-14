@@ -141,9 +141,10 @@ public class ROVER_04 {
         blue.add(new Group("Dummy Group #1", "localhost", 53799));
 
         // blue rooster
+        blue.add(new Group("GROUP_01", "localhost", 53701));
         blue.add(new Group("GROUP_02", "localhost", 53702));
         blue.add(new Group("GROUP_03", "localhost", 53703));
-        blue.add(new Group("GROUP_04", "localhost", 53704));
+        // Rover 4 
         blue.add(new Group("GROUP_05", "localhost", 53705));
         blue.add(new Group("GROUP_06", "localhost", 53706));
         blue.add(new Group("GROUP_07", "localhost", 53707));
@@ -285,7 +286,7 @@ public class ROVER_04 {
 //movement of rover
 	public void roverMovement(MapTile[][] scanMapTiles, Coord currentLoc) throws IOException, InterruptedException
 	{
-		detectCrystal(scanMapTiles);
+		detectMineral(scanMapTiles);
 		int centerIndex = (scanMap.getEdgeSize() - 1) / 2;
 		if(checkValidityOfMove(scanMapTiles, direction))
 		{
@@ -453,7 +454,7 @@ public class ROVER_04 {
 				
 				// ****************** Check scan map for science and shared them ***********************
 				
-				detectCrystal(scanMap.getScanMap());
+				detectMineral(scanMap.getScanMap());
 				System.out.println("SCIENCE DISCOVERED: " + science_discovered);
 				shareScience();
 				
@@ -539,11 +540,11 @@ public class ROVER_04 {
 	 * @param scanMapTiles
 	 * @author Shay
 	 */
-	private void detectCrystal(MapTile[][] scanMapTiles) {
+	private void detectMineral(MapTile[][] scanMapTiles) {
 		for (int x = 0; x < scanMapTiles.length; x++) {
 			for (int y = 0; y < scanMapTiles[x].length; y++) {
 				MapTile mapTile = scanMapTiles[x][y];
-				if (mapTile.getScience() == Science.CRYSTAL) {
+				if (mapTile.getScience() == Science.MINERAL) {
 					int tileX = roverLoc.xpos + (x - 3);
 					int tileY = roverLoc.ypos + (y - 3);
 					Coord coord = new Coord(mapTile.getTerrain(), mapTile.getScience(), tileX, tileY);
