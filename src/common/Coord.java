@@ -11,24 +11,17 @@ public class Coord {
 	
 	public final int xpos;
 	public final int ypos;
-	Terrain terrain;
-    boolean hasRover;
+    Terrain terrain;
     Science science;
-	
+
 	@Override
 	public String toString() {
-		 return terrain + " " + science + " " + xpos + " " + ypos;
+		return "Coord [xpos=" + xpos + ", ypos=" + ypos + "]";
 	}
 
 	public Coord(int x, int y){
 		this.xpos = x;
 		this.ypos = y;
-	}
-	
-	public Coord(Terrain terrain, Science science, int x, int y) {
-		this(x, y);
-		this.science = science;
-		this.terrain = terrain;
 	}
 	
     @Override
@@ -56,4 +49,9 @@ public class Coord {
         return ((this.xpos == theOther.xpos) && (this.ypos == theOther.ypos));
     }
 	
+    public Coord(Terrain terrain, Science science, int x, int y) {
+        this(x, y);
+        this.science = science;
+        this.terrain = terrain;
+    }
 }
