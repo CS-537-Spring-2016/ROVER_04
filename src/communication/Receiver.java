@@ -18,10 +18,6 @@ public interface Receiver {
      *         incoming message from other ROVERS */
     List<Terrain> getIgnoredTerrains();
 
-    /** @return A list of sciences you want to ignored or "filtered" out from
-     *         incoming message from other ROVERS */
-    List<Science> getPreferedSciences();
-
     /** @return A list of all the coordinates sent to you from other ROVERS that
      *         did not get "filtered" out */
     List<Coord> getSharedCoords();
@@ -30,11 +26,6 @@ public interface Receiver {
      *            Ignored all incoming result from other ROVERS that is on these
      *            Terrains. For example, Walkers would want to ignore SAND */
     void ignoreTerrains(Terrain... terrains);
-
-    /** @param sciences
-     *            All the science you want to collect. The science you want to
-     *            filter out from incoming messages from other ROVERS */
-    void acceptSciences(Science... sciences);
 
     /** Start ROVER server, accept incoming message from other ROVERS
      * 

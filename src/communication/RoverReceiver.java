@@ -21,7 +21,6 @@ public class RoverReceiver implements Receiver {
 
     private ServerSocket listenSocket;
     private List<Coord> sharedScienceCoords;
-    private List<Science> acceptedSciences;
     private List<Terrain> ignoredTerrains;
     private int roversConnectedToMe;
 
@@ -60,16 +59,6 @@ public class RoverReceiver implements Receiver {
     @Override
     public List<Coord> getSharedCoords() {
         return sharedScienceCoords;
-    }
-
-    @Override
-    public void acceptSciences(Science... sciences) {
-        acceptedSciences = Arrays.asList(sciences);
-    }
-
-    @Override
-    public List<Science> getPreferedSciences() {
-        return acceptedSciences;
     }
 
     @Override

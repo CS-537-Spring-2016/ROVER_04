@@ -77,8 +77,7 @@ public class Group {
     }
 
     public String toString() {
-        return "name=" + name + " ip=" + ip + " port=" + port + " drive=" + driveType + " tools="
-                + tools[0] + "+" + tools[1];
+        return "name=" + name;
     }
 
     /** @param ip
