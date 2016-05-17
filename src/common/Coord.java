@@ -3,12 +3,17 @@ package common;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import enums.Science;
+import enums.Terrain;
+
 public class Coord {
 	// thanks to this posting http://stackoverflow.com/questions/27581/what-issues-should-be-considered-when-overriding-equals-and-hashcode-in-java
 	
 	public final int xpos;
 	public final int ypos;
-	
+    Terrain terrain;
+    Science science;
+
 	@Override
 	public String toString() {
 		return "Coord [xpos=" + xpos + ", ypos=" + ypos + "]";
@@ -44,4 +49,9 @@ public class Coord {
         return ((this.xpos == theOther.xpos) && (this.ypos == theOther.ypos));
     }
 	
+    public Coord(Terrain terrain, Science science, int x, int y) {
+        this(x, y);
+        this.science = science;
+        this.terrain = terrain;
+    }
 }
