@@ -16,6 +16,10 @@ import com.google.gson.reflect.TypeToken;
 import common.Coord;
 import common.MapTile;
 import common.ScanMap;
+import communication.Group;
+import communication.RoverCommunication;
+import enums.RoverDriveType;
+import enums.RoverToolType;
 import enums.Terrain;
 
 /**
@@ -33,6 +37,9 @@ public class ROVER_04 {
 	int sleepTime;
 	String SERVER_ADDRESS = "localhost";
 	static final int PORT_ADDRESS = 9537;
+	
+	/* Communication Module*/
+    RoverCommunication rocom;
 
 	public ROVER_04() {
 		// constructor
@@ -63,6 +70,25 @@ public class ROVER_04 {
 
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new PrintWriter(socket.getOutputStream(), true);
+			
+			// ******************* SET UP COMMUNICATION MODULE by Shay *********************
+            /* Your Group Info*/
+            Group group = new Group(rovername, SERVER_ADDRESS, 53704, RoverDriveType.WALKER,
+                    RoverToolType.DRILL, RoverToolType.RADAR_SENSOR);
+
+            /* Setup communication, only communicates with gatherers */
+            rocom = new RoverCommunication(group,
+                    Group.getGatherers(Group.blueCorp(SERVER_ADDRESS)));
+
+            /* Can't go on ROCK, thus ignore any SCIENCE COORDS that is on ROCK */
+            rocom.getReceiver().ignoreTerrains(Terrain.ROCK);
+
+            /* Connect to the other ROVERS */
+            rocom.run();
+
+            /* Start your server, receive incoming message from other ROVERS */
+            rocom.startServer();
+            // ******************************************************************
 			
 	
 			// Process all messages from server, wait until server requests Rover ID
@@ -319,7 +345,11 @@ public class ROVER_04 {
 				System.out.println("ROVER_04 blocked test " + blocked);
 	
 				// TODO - logic to calculate where to move next
-	
+				
+				
+				 /* ********* Detect and Share Science ***************/
+                rocom.detectAndShare(scanMap.getScanMap(), currentLoc, 3);
+                /* *************************************************/
 				
 				// this is the Rovers HeartBeat, it regulates how fast the Rover cycles through the control loop
 				Thread.sleep(sleepTime);
