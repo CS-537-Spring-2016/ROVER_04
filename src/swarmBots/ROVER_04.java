@@ -1,6 +1,7 @@
 package swarmBots;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,6 +13,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import com.google.gson.Gson;
@@ -50,6 +52,7 @@ public class ROVER_04 {
 
     // every science detected will be added in to this set
     Set<Coord> science_Store = new HashSet<Coord>();
+	static ArrayList<String> paths = new ArrayList<String>();
 
     // this set contains all the science the ROVERED has shared
     // thus whatever thats in science_collection that is not in display_science
@@ -59,10 +62,13 @@ public class ROVER_04 {
     // ROVER current location
     Coord roverLoc;
     
+    
+	String currentDir = "E";
     // Your ROVER is going to listen for connection with this
     ServerSocket listenSocket;
     Coord Rover_Current_Loc = null;
 	Coord Rover_Previous_Loc = null;
+	
 	public ROVER_04() {
 		// constructor
 		System.out.println("ROVER_04 rover object constructed");
@@ -212,13 +218,13 @@ public class ROVER_04 {
 									// could be velocity limit or obstruction etc.
 			boolean blocked = false;
 	
-			String[] cardinals = new String[4];
+			/*String[] cardinals = new String[4];
 			cardinals[0] = "N";
 			cardinals[1] = "E";
 			cardinals[2] = "S";
 			cardinals[3] = "W";
 	
-			String currentDir = cardinals[0];
+			String currentDir = cardinals[0];*/
 			//Coord Rover_Current_Loc = null;
 			//Coord Rover_Previous_Loc = null;
 	
@@ -274,7 +280,10 @@ public class ROVER_04 {
 				detectMineral(scanMap.getScanMap());
 				shareScience();
 				// try moving east 5 block if blocked
-				if (blocked) {
+				masterMovement(scanMapTiles, Rover_Current_Loc, targetLocation);			
+				
+				
+				/*if (blocked) {
 					
 					//for (int i = 0; i < 5; i++) {
 						if (!scanMapTiles[centerIndex +1][centerIndex].getHasRover() 
@@ -381,7 +390,7 @@ public class ROVER_04 {
 							}
 						}					
 					}
-				}
+				}*/
 				// another call for current location
 				out.println("LOC");
 				line = in.readLine();
@@ -435,6 +444,161 @@ public class ROVER_04 {
 		}
 	}
 	
+	//movement of rover
+		public void masterMovement(MapTile[][] scanMapTiles, Coord currentLocation, Coord targetLocation) throws IOException, InterruptedException
+		{
+			int centerIndex = (scanMap.getEdgeSize() - 1)/2;
+			int cx = currentLocation.xpos, cy = currentLocation.ypos;
+			int tx = targetLocation.xpos, ty = targetLocation.ypos;
+
+			if (tx == cx && cy == ty){
+				
+            	System.out.println("ROVER_04 reach target location");
+			}
+			else if (cx < tx ){
+								currentDir = "E";
+								if(isValidMovement(scanMapTiles, currentDir))
+								{
+									move(currentDir);
+									//Thread.sleep(1100);
+									System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
+									if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+										System.out.println("ROVER_04 request GATHER");
+										out.println("GATHER");
+									}
+									//counter ++;
+								}
+								else
+								{
+
+									while (!isValidMovement(scanMapTiles, currentDir)) {
+
+										currentDir = changeRoverDirection(currentDir);
+									}
+									
+									move(currentDir);
+									//Thread.sleep(1100);
+									System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
+									if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+										System.out.println("ROVER_04 request GATHER");
+										out.println("GATHER");
+									}
+								}
+				
+			} else if (cx > tx) {
+				currentDir = "W";
+			} else if (cy < ty) {
+				currentDir = "S";
+			}
+			else
+				currentDir = "N";
+
+		
+
+			if(isValidMovement(scanMapTiles, currentDir))
+			{
+				move(currentDir);
+				//Thread.sleep(1100);
+				System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
+				if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+					System.out.println("ROVER_04 request GATHER");
+					out.println("GATHER");
+				}
+				//counter ++;
+			}
+			else
+			{
+				while (!isValidMovement(scanMapTiles, currentDir)) {
+
+					currentDir = changeRoverDirection(currentDir);
+				}
+				
+				move(currentDir);
+				//Thread.sleep(1100);
+				System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() " + scanMapTiles[centerIndex][centerIndex].getScience().getSciString());
+				if (scanMapTiles[centerIndex][centerIndex].getScience().getSciString().equals("N")) {
+					System.out.println("ROVER_04 request GATHER");
+					out.println("GATHER");
+				}
+				
+			}
+			/*if(counter == 5)
+			{
+				counter = 0;
+				direction = changeRoverDirection(direction);
+			}*/
+		} 
+		
+		//validty of rover next move
+		public Boolean isValidMovement(MapTile[][] scanMapTiles, String currentDir)
+		{
+			int centerIndex = (scanMap.getEdgeSize() - 1) / 2;
+			int x_Position = centerIndex;
+			int y_Position = centerIndex;
+			switch(currentDir){
+			
+			case "E" : x_Position = x_Position+1;
+			break;
+			case "W" : x_Position = x_Position-1;
+			break;
+			case "N" : y_Position = y_Position-1;
+			break;
+			case "S" : y_Position = y_Position+1;
+			break;
+			}
+			if(scanMapTiles[x_Position][y_Position].getHasRover() || scanMapTiles[x_Position][y_Position].getTerrain() == Terrain.SAND || scanMapTiles[x_Position][y_Position].getTerrain() == Terrain.NONE)
+			{
+				return false;
+			}
+			else
+				return true;
+			
+		}
+		
+		//this function will move the rover randomly in the east,west,north or south direction.	
+		public String changeRoverDirection(String currentDir)
+		{
+			/*ArrayList<String> paths = new ArrayList<String>();
+			paths.add(currentDir);
+			paths.add("W");
+			paths.add("N");
+			paths.add("S");*/
+			/*paths.add(currentDir);
+			if((paths.get(paths.size()-1) == paths.get(paths.size()-2)) && (paths.get(paths.size()-1) == paths.get(paths.size()-3) && (paths.get(paths.size()-1) == paths.get(paths.size()-4)))){
+				if(currentDir.equals("E"))
+					
+					return "N";
+				else if(currentDir.equals("W"))
+					return "N";
+			}*/
+			Random r = new Random();
+			switch(currentDir)
+			{
+			
+			case "E": return paths.get(r.nextInt(4));
+			case "W": return paths.get(r.nextInt(4));
+			case "N": return paths.get(r.nextInt(4));
+			case "S": return paths.get(r.nextInt(4));
+			default: return null;
+			}
+		}
+		/*public void calculateX_Y(String currentDir) {
+			int centerIndex = (scanMap.getEdgeSize() - 1) / 2;
+			int x_Position = centerIndex;
+			int y_Position = centerIndex;
+			switch(currentDir){
+			
+			case "E" : x_Position = x_Position+1;
+			break;
+			case "W" : x_Position = x_Position-1;
+			break;
+			case "N" : y_Position = y_Position-1;
+			break;
+			case "S" : y_Position = y_Position+1;
+			break;
+			}
+			
+		}*/
 	public void move(String direction) {
 		out.println("MOVE " + direction);
 	}
@@ -577,6 +741,10 @@ public class ROVER_04 {
 	 */
 	public static void main(String[] args) throws Exception {
 		ROVER_04 client = new ROVER_04();
+		paths.add("E");
+		paths.add("W");
+		paths.add("N");
+		paths.add("S");
 		client.run();
 	}
 }
