@@ -42,7 +42,7 @@ public class ROVER_04 {
 	String rovername;
 	ScanMap scanMap;
 	int sleepTime;
-	String SERVER_ADDRESS = "localhost";
+	String SERVER_ADDRESS = "192.168.1.106";
 	static final int PORT_ADDRESS = 9537;
 	
 	List<Socket> output_Sockets = new ArrayList<Socket>();
@@ -73,7 +73,7 @@ public class ROVER_04 {
 		// constructor
 		System.out.println("ROVER_04 rover object constructed");
 		rovername = "ROVER_04";
-		SERVER_ADDRESS = "localhost";
+		SERVER_ADDRESS = "192.168.1.106";
 		// this should be a safe but slow timer value
 		sleepTime = 300; // in milliseconds - smaller is faster, but the server will cut connection if it is too small
 	}
