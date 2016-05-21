@@ -22,7 +22,7 @@ import enums.Terrain;
  */
 
 public class ROVER_04 {
-	int changes; //testing git push
+	
 	BufferedReader in;
 	PrintWriter out;
 	String rovername;
