@@ -362,7 +362,7 @@ public void masterMovement(MapTile[][] scanMapTiles, Coord currentLocation,
 		// Thread.sleep(1100);
 		collectScience(scanMapTiles , centerIndex);
 		rocom.detectAndShare(scanMap.getScanMap(), Rover_Current_Loc, 3);
-	
+	//D
 
 
 
