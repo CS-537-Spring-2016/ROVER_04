@@ -62,18 +62,6 @@ import enums.Science;
 
 
 
-/**
-
- * The seed that this program is built on is a chat program example found here:
-
- * http://cs.lmu.edu/~ray/notes/javanetexamples/ Many thanks to the authors for
-
- * publishing their code examples
-
- */
-
-
-
 public class ROVER_04 {
 
 
@@ -94,6 +82,8 @@ public class ROVER_04 {
 
 
 	int counter;
+	int counter1;
+	int counter2;
 
 
 
@@ -109,13 +99,12 @@ public class ROVER_04 {
 
 	// every science detected will be added in to this set
 
-	Set<Coord> science_Store = new HashSet<Coord>();
-
 	static ArrayList<String> paths = new ArrayList<String>();
 
 
 
 	// this set contains all the science the ROVERED has shared
+	
 
 	// thus whatever thats in science_collection that is not in display_science
 
@@ -123,13 +112,7 @@ public class ROVER_04 {
 
 	Set<Coord> displayed_science = new HashSet<Coord>();
 
-
-
 	// ROVER current location
-
-	Coord roverLoc;
-
-
 
 	String currentDir = "E";
 
@@ -137,17 +120,19 @@ public class ROVER_04 {
 
 	ServerSocket listenSocket;
 
+	// ROVER current location
 	Coord Rover_Current_Loc = null;
-
+	
+	// ROVER previous location
 	Coord Rover_Previous_Loc = null;
 
+	List<Coord> mineralCoordinates = new ArrayList<Coord>();
 
+	Coord mineralLocation = null;
 
 	/* Communication Module*/
 
 	RoverCommunication rocom;
-
-
 
 	public ROVER_04() {
 
@@ -197,7 +182,6 @@ public class ROVER_04 {
 
 		// Make connection to SwarmServer and initialize streams
 
-
 		Socket socket = new Socket(SERVER_ADDRESS, PORT_ADDRESS);
 
 
@@ -240,9 +224,7 @@ public class ROVER_04 {
 
 
 
-		// Process all messages from server, wait until server requests Rover ID
-
-		// name - Return Rover Name to complete connection
+		// This sets the name of this instance of a swarmBot for identifying thread to the server
 
 		while (true) {
 
@@ -250,11 +232,7 @@ public class ROVER_04 {
 
 			if (line.startsWith("SUBMITNAME")) {
 
-				out.println(rovername); // This sets the name of this instance
-
-				// of a swarmBot for identifying the
-
-				// thread to the server
+				out.println(rovername); 
 
 				break;
 
@@ -308,7 +286,7 @@ public class ROVER_04 {
 
 		if (line.startsWith("START_LOC")) {
 
-			rovergroupStartPosition = extractLocationFromString(line);
+			rovergroupStartPosition = extractLocation(line);
 
 		}
 
@@ -334,7 +312,7 @@ public class ROVER_04 {
 
 		if (line.startsWith("TARGET_LOC")) {
 
-			targetLocation = extractLocationFromString(line);
+			targetLocation = extractLocation(line);
 
 		}
 
@@ -404,7 +382,7 @@ public class ROVER_04 {
 
 				// loc = line.substring(4);
 
-				Rover_Current_Loc = extractLocationFromString(line);
+				Rover_Current_Loc = extractLocation(line);
 
 
 
@@ -450,20 +428,14 @@ public class ROVER_04 {
 
 			// tile S = y + 1; N = y - 1; E = x + 1; W = x - 1
 
-
-
-
-
 			// try moving east 5 block if blocked
 
+			
+			/* move the rover towards its destination */
 			masterMovement(scanMapTiles, Rover_Current_Loc, targetLocation);
-
-
-
-
-
+			
+			
 			// another call for current location
-
 			out.println("LOC");
 
 			line = in.readLine();
@@ -478,20 +450,11 @@ public class ROVER_04 {
 
 			if (line.startsWith("LOC")) {
 
-				Rover_Current_Loc = extractLocationFromString(line);
+				Rover_Current_Loc = extractLocation(line);
 
 
 
 			}
-
-
-
-			// TODO - logic to calculate where to move next
-
-
-
-
-
 			/* ********* Detect and Share Science ***************/
 
 			//rocom.detectAndShare(scanMap.getScanMap(), Rover_Current_Loc, 3);
@@ -526,7 +489,6 @@ public class ROVER_04 {
 
 		while (in.ready()) {
 
-			// System.out.println("ROVER_04 clearing readLine()");
 
 			in.readLine();
 
@@ -539,71 +501,65 @@ public class ROVER_04 {
 	public void masterMovement(MapTile[][] scanMapTiles, Coord currentLocation,
 
 			Coord targetLocation) throws IOException, InterruptedException {
-
-
-
-
 		int centerIndex = (scanMap.getEdgeSize() - 1) / 2;
 
 		int cx = currentLocation.xpos, cy = currentLocation.ypos;
 
 		int tx = targetLocation.xpos, ty = targetLocation.ypos;
 
-		/*if (counter < 5)
-
-counter++;
-
-else{
-
-counter = 0;
-
-eastBlock = true;
-
-}
-
-		 */
-
 		if (tx == cx && cy == ty) {
-
-
-
 			System.out.println("ROVER_04 reaches target location");
-
-			counter++;
-
 			currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
-
-
-
 
 
 		} else if (cx < tx) {
 
-			if (counter == 0)
+			if (counter == 0){
 
 				currentDir = "E";
+				System.out.println(counter);
+	
+			
+		}
+			else
+				if (counter < 80){
+					
+					if (isValidMovement(scanMapTiles, currentDir) && currentDir == "W"){
+						if(counter1 < 20){
+							
+							if (isValidMovement(scanMapTiles, currentDir)){
+								System.out.println(counter);
 
-			else if (counter < 50){
+								currentDir = currentDir;
+								counter++;
+								counter1++;
 
+					}
+						}
+						else{
+							System.out.println(counter);
+							counter++;
+							counter1=0;
+							currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
+						}
+					}
 
-
-
+					else if (isValidMovement(scanMapTiles, currentDir)){
+					currentDir = currentDir;
+					counter++;
+				}
+				else{
+					System.out.println(counter);
 
 				currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
-
-
-
 				counter++;
 
+			}
 			}
 
 			else
 
 				counter=0;
-
-
-
-
 
 		} else if (cx > tx) {
 
@@ -611,25 +567,39 @@ eastBlock = true;
 
 				currentDir = "W";
 
-			else if (counter < 50){
+			else
+				if (counter < 80){
+					
+					if (isValidMovement(scanMapTiles, currentDir) && currentDir == "E"){
+						if(counter1 < 20){
+							if (isValidMovement(scanMapTiles, currentDir)){
+								currentDir = currentDir;
+								counter++;
+								counter1++;
 
+					}
+						}
+						else{
+							counter++;
+							counter1=0;
+							currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
+						}
+					}
 
-
-
+					else if (isValidMovement(scanMapTiles, currentDir)){
+					currentDir = currentDir;
+					counter++;
+				}
+				else{
 
 				currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
-
 				counter++;
 
 			}
-
+			}
 			else
 
 				counter=0;
-
-
-
-
 
 		} else if (cy < ty) {
 
@@ -637,18 +607,35 @@ eastBlock = true;
 
 				currentDir = "S";
 
-			else if (counter < 50){
+			else
+				if (counter < 80){
+					
+					if (isValidMovement(scanMapTiles, currentDir) && currentDir == "N"){
+						if(counter1 < 20){
+							if (isValidMovement(scanMapTiles, currentDir)){
+								currentDir = currentDir;
+								counter++;
+								counter1++;
 
+					}
+						}
+						else{
+							counter++;
+							counter1=0;
+							currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
+						}
+					}
 
-
-
+					else if (isValidMovement(scanMapTiles, currentDir)){
+					currentDir = currentDir;
+					counter++;
+				}
+				else{
 
 				currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
-
-
-
 				counter++;
 
+			}
 			}
 
 			else
@@ -663,18 +650,35 @@ eastBlock = true;
 
 				currentDir = "N";
 
-			else if (counter < 50){
+			else
+				if (counter < 80){
+					
+					if (isValidMovement(scanMapTiles, currentDir) && currentDir == "S"){
+						if(counter1 < 20){
+							if (isValidMovement(scanMapTiles, currentDir)){
+								currentDir = currentDir;
+								counter++;
+								counter1++;
 
+					}
+						}
+						else{
+							counter++;
+							counter1=0;
+							currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
+						}
+					}
 
+					else if (isValidMovement(scanMapTiles, currentDir)){
+					currentDir = currentDir;
+					counter++;
+				}
+				else{
 
-
-
-				currentDir =changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
-
-
-
+				currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
 				counter++;
 
+			}
 			}
 
 			else
@@ -682,22 +686,15 @@ eastBlock = true;
 				counter=0;
 
 		}
-
+		
 		if (isValidMovement(scanMapTiles, currentDir)) {
 
 			move(currentDir);
 
-			// Thread.sleep(1100);
 
 			collectScience(scanMapTiles , centerIndex);
 
 			rocom.detectAndShare(scanMap.getScanMap(), Rover_Current_Loc, 3);
-
-
-
-
-
-			// counter ++;
 
 		} else {
 
@@ -717,7 +714,6 @@ eastBlock = true;
 
 			move(currentDir);
 
-			// Thread.sleep(1100);
 
 			collectScience(scanMapTiles , centerIndex);
 
@@ -725,30 +721,9 @@ eastBlock = true;
 
 
 
-
-
-
-
-
-
-
 		}
 
-
-
 	}
-
-	/*
-
-	 * if(counter == 5) { counter = 0; direction =
-
-	 * changeRoverDirection(direction); }
-
-	 */
-
-
-
-
 
 	// validty of rover next move
 
@@ -826,12 +801,6 @@ eastBlock = true;
 
 		Random r = new Random();
 
-		if (cx < tx)
-
-			return paths.get(r.nextInt(3));
-
-		else
-
 			return paths.get(r.nextInt(4));
 
 
@@ -889,7 +858,57 @@ eastBlock = true;
 
 		}	}
 
+	//detecting mineral
 
+	public void detectMineral(MapTile[][] scanMapTiles, Coord currentLoc) 
+
+	{       
+
+	int centerIndex = (scanMap.getEdgeSize() - 1) / 2;
+
+	int xPosition = currentLoc.xpos - centerIndex;
+
+	int yPosition = currentLoc.ypos - centerIndex;
+
+	int scienceInXPos, scienceInYPos;
+
+	    for (int x = 0; x < scanMapTiles.length; x++) 
+
+	    {
+
+	            for (int y = 0; y < scanMapTiles.length; y++) 
+
+	            {
+
+	                if (scanMapTiles[x][y].getScience() == Science.MINERAL) 
+
+	                {
+
+	                // we will get the  mineral in rock and gravel which because our rover has drill with radar_sensor.
+
+	                if( scanMapTiles[x][y].getTerrain() == Terrain.ROCK || scanMapTiles[x][y].getTerrain() == Terrain.GRAVEL || scanMapTiles[x][y].getTerrain() == Terrain.SOIL)
+
+	                 {
+
+	                scienceInXPos = xPosition + x;
+
+	                scienceInYPos = yPosition + y;
+
+	                Coord coord = new Coord(scanMapTiles[x][y].getTerrain(), scanMapTiles[x][y].getScience(),
+
+	                		scienceInXPos, scienceInYPos);
+
+	                mineralCoordinates.add(coord);
+
+	                }
+
+	                }
+
+	            }
+
+	    }
+
+	}
 
 	// method to retrieve a list of the rover's EQUIPMENT from the server
 
@@ -1067,7 +1086,7 @@ eastBlock = true;
 
 	// returns a Coord object
 
-	public static Coord extractLocationFromString(String sStr) {
+	public static Coord extractLocation(String sStr) {
 
 		int indexOf;
 
