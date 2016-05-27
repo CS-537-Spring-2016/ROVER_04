@@ -11,18 +11,32 @@ public class Coord {
 	
 	public final int xpos;
 	public final int ypos;
-    Terrain terrain;
-    Science science;
-
+    public Terrain terrain;
+    public boolean hasRover;
+    public Science science;
+	
 	@Override
 	public String toString() {
 		return "Coord [xpos=" + xpos + ", ypos=" + ypos + "]";
 	}
 
+    public Coord(Terrain terrain, Science science, int x, int y) {
+        this(x, y);
+        this.science = science;
+        this.terrain = terrain;
+    }
+    
 	public Coord(int x, int y){
 		this.xpos = x;
 		this.ypos = y;
 	}
+	
+    /** @return String that can be used to send to other ROVERS. This string
+     *         follows the communication protocol: TERRAIN SCIENCE XPOS YPOS
+     * @author Shay */
+    public String toProtocol() {
+        return terrain + " " + science + " " + xpos + " " + ypos;
+    }
 	
     @Override
     public int hashCode() {
@@ -49,9 +63,4 @@ public class Coord {
         return ((this.xpos == theOther.xpos) && (this.ypos == theOther.ypos));
     }
 	
-    public Coord(Terrain terrain, Science science, int x, int y) {
-        this(x, y);
-        this.science = science;
-        this.terrain = terrain;
-    }
 }
