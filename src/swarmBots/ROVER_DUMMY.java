@@ -11,8 +11,7 @@ public class ROVER_DUMMY {
     public static void main(String[] args) {
 
         try {
-            @SuppressWarnings("resource")
-			ServerSocket serverSocket = new ServerSocket(53799);
+            ServerSocket serverSocket = new ServerSocket(53799);
             System.out.println("ROVER_DUMMY waiting...");
 
             Socket socket = serverSocket.accept();
