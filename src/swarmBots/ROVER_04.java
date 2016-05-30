@@ -30,15 +30,11 @@ import java.util.Random;
 
 import java.util.Set;
 
-
-
 import com.google.gson.Gson;
 
 import com.google.gson.GsonBuilder;
 
 import com.google.gson.reflect.TypeToken;
-
-
 
 import common.Coord;
 
@@ -58,8 +54,6 @@ import enums.Terrain;
 
 import enums.Science;
 
-
-
 public class ROVER_04 {
 
 	BufferedReader in;
@@ -75,7 +69,6 @@ public class ROVER_04 {
 	String SERVER_ADDRESS = "localhost";
 
 	static final int PORT_ADDRESS = 9537;
-
 
 	int counter;
 	int counter1;
@@ -107,10 +100,9 @@ public class ROVER_04 {
 
 	Coord mineralLocation = null;
 
-	/* Communication Module*/
+	/* Communication Module */
 
 	RoverCommunication rocom;
-
 
 	public ROVER_04() {
 
@@ -120,7 +112,7 @@ public class ROVER_04 {
 
 		rovername = "ROVER_04";
 
-		SERVER_ADDRESS = "localhost";  //"192.168.1.106"
+		SERVER_ADDRESS = "localhost"; // "192.168.1.106"
 
 		// this should be a safe but slow timer value
 
@@ -129,7 +121,6 @@ public class ROVER_04 {
 		// will cut connection if it is too small
 
 	}
-
 
 	public ROVER_04(String serverAddress) {
 
@@ -148,27 +139,25 @@ public class ROVER_04 {
 	}
 
 	/**
-
+	 * 
 	 * Connects to the server then enters the processing loop.
-
+	 * 
 	 */
 
 	private void run() throws IOException, InterruptedException {
-
-
 
 		// Make connection to SwarmServer and initialize streams
 
 		Socket socket = new Socket(SERVER_ADDRESS, PORT_ADDRESS);
 
-
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
 		out = new PrintWriter(socket.getOutputStream(), true);
 
-		// ******************* SET UP COMMUNICATION MODULE by Shay *********************
+		// ******************* SET UP COMMUNICATION MODULE by Shay
+		// *********************
 
-		/* Group Info*/
+		/* Group Info */
 
 		Group group = new Group(rovername, SERVER_ADDRESS, 53704, RoverDriveType.WALKER,
 
@@ -180,7 +169,6 @@ public class ROVER_04 {
 
 		rocom.setGroupList(Group.getGatherers());
 
-
 		/* Can't go on SAND, thus ignore any SCIENCE COORDS that is on SAND */
 
 		rocom.ignoreTerrain(Terrain.SAND);
@@ -191,7 +179,8 @@ public class ROVER_04 {
 
 		// ******************************************************************
 
-		// This sets the name of this instance of a swarmBot for identifying thread to the server
+		// This sets the name of this instance of a swarmBot for identifying
+		// thread to the server
 
 		while (true) {
 
@@ -199,7 +188,7 @@ public class ROVER_04 {
 
 			if (line.startsWith("SUBMITNAME")) {
 
-				out.println(rovername); 
+				out.println(rovername);
 
 				break;
 
@@ -207,9 +196,8 @@ public class ROVER_04 {
 
 		}
 
-		// ***************************************** Rover logic setup *********************************************/
-
-
+		// ***************************************** Rover logic setup
+		// *********************************************/
 
 		String line = "";
 
@@ -217,12 +205,10 @@ public class ROVER_04 {
 
 		Coord targetLocation = null;
 
-
-
 		/**
-
+		 * 
 		 * Get initial values that won't change
-
+		 * 
 		 */
 
 		// **** get equipment listing ****
@@ -233,9 +219,7 @@ public class ROVER_04 {
 
 		System.out.println(rovername + " equipment list results "
 
-+ equipment + "\n");
-
-
+				+ equipment + "\n");
 
 		// **** Request START_LOC Location from SwarmServer ****
 
@@ -259,9 +243,7 @@ public class ROVER_04 {
 
 		System.out.println(rovername + " START_LOC "
 
-+ rovergroupStartPosition);
-
-
+				+ rovergroupStartPosition);
 
 		// **** Request TARGET_LOC Location from SwarmServer ****
 
@@ -285,12 +267,6 @@ public class ROVER_04 {
 
 		System.out.println(rovername + " TARGET_LOC " + targetLocation);
 
-
-
-
-
-
-
 		boolean stuck = false; // just means it did not change locations
 
 		// between requests,
@@ -299,35 +275,29 @@ public class ROVER_04 {
 
 		// etc.
 
-
-
 		/*
-
-		 * String[] cardinals = new String[4]; cardinals[0] = "N";
-
-		 * cardinals[1] = "E"; cardinals[2] = "S"; cardinals[3] = "W";
-
 		 * 
-
+		 * String[] cardinals = new String[4]; cardinals[0] = "N";
+		 * 
+		 * cardinals[1] = "E"; cardinals[2] = "S"; cardinals[3] = "W";
+		 * 
+		 * 
+		 * 
 		 * String currentDir = cardinals[0];
-
+		 * 
 		 */
 
 		// Coord Rover_Current_Loc = null;
 
 		// Coord Rover_Previous_Loc = null;
 
-
-
 		/**
-
+		 * 
 		 * #### Rover controller process loop ####
-
+		 * 
 		 */
 
 		while (true) {
-
-
 
 			// **** Request Rover Location from SwarmServer ****
 
@@ -351,15 +321,11 @@ public class ROVER_04 {
 
 				Rover_Current_Loc = extractLocation(line);
 
-
-
 			}
 
 			System.out.println(rovername + " currentLoc at start: "
 
-+ Rover_Current_Loc);
-
-
+					+ Rover_Current_Loc);
 
 			// after getting location set previous equal current to be able
 
@@ -367,11 +333,7 @@ public class ROVER_04 {
 
 			Rover_Previous_Loc = Rover_Current_Loc;
 
-
-
 			// ***** do a SCAN *****
-
-
 
 			// gets the scanMap from the server based on the Rover current
 
@@ -382,8 +344,6 @@ public class ROVER_04 {
 			// prints the scanMap to the Console output for debug purposes
 
 			scanMap.debugPrintMap();
-
-
 
 			// ***** MOVING *****
 
@@ -397,10 +357,8 @@ public class ROVER_04 {
 
 			// try moving east 5 block if blocked
 
-
 			/* move the rover towards its destination */
 			masterMovement(scanMapTiles, Rover_Current_Loc, targetLocation);
-
 
 			// another call for current location
 			out.println("LOC");
@@ -419,37 +377,26 @@ public class ROVER_04 {
 
 				Rover_Current_Loc = extractLocation(line);
 
-
-
 			}
 			/* ********* Detect and Share Science ***************/
 
-			//rocom.detectAndShare(scanMap.getScanMap(), Rover_Current_Loc, 3);
+			// rocom.detectAndShare(scanMap.getScanMap(), Rover_Current_Loc, 3);
 
 			/* *************************************************/
 
-
-
-			// this is the Rovers HeartBeat, it regulates how fast the Rover cycles through the control loop
+			// this is the Rovers HeartBeat, it regulates how fast the Rover
+			// cycles through the control loop
 
 			Thread.sleep(sleepTime);
-
-
 
 			System.out.println("ROVER_04 ------------ bottom process control --------------");
 
 		}
 
-
-
-
-
 	} // END of Rover main control loop
 
-
-
-	// ################################################### Movement Methods ###########################################/
-
+	// ################################################### Movement Methods
+	// ###########################################/
 
 	// Move the rover toward the target.
 
@@ -462,201 +409,193 @@ public class ROVER_04 {
 
 		int tx = targetLocation.xpos, ty = targetLocation.ypos;
 
-
 		// if the rover arrive to the target location.
-		if (tx == cx && cy == ty) { 
+		if (tx == cx && cy == ty) {
 			System.out.println("ROVER_04 reaches target location");
 			currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
 
-			// if the rover current location locates on the left side of the target location.
+			// if the rover current location locates on the left side of the
+			// target location.
 		} else if (cx < tx) {
 
-			if (counter == 0){
+			if (counter == 0) {
 
 				currentDir = "E";
 				System.out.println(counter);
 
-			}
-			else
-				if (counter < 10){
+			} else if (counter < 10) {
 
-					if (isValidMovement(scanMapTiles, currentDir) && currentDir == "W"){
-						if(counter1 < 5){
+				if (isValidMovement(scanMapTiles, currentDir) && currentDir == "W") {
+					if (counter1 < 5) {
 
-							if (isValidMovement(scanMapTiles, currentDir)){
+						if (isValidMovement(scanMapTiles, currentDir)) {
 
-								currentDir = currentDir;
-								counter++;
-								counter1++;
-							}
-						}
-						else{
+							currentDir = currentDir;
 							counter++;
-							counter1=0;
-							currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
+							counter1++;
 						}
-					}
-
-					else if (isValidMovement(scanMapTiles, currentDir)){
-
-						currentDir = currentDir;
+					} else {
 						counter++;
-					}
-					else{
-
+						counter1 = 0;
 						currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
-						counter++;
-
 					}
+				}
 
-				}else
+				else if (isValidMovement(scanMapTiles, currentDir)) {
 
-					counter=0;
+					currentDir = currentDir;
+					counter++;
+				} else {
 
-			// if the rover current location locates on the right side of the target location.
+					currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
+					counter++;
+
+				}
+
+			} else
+
+				counter = 0;
+
+			// if the rover current location locates on the right side of the
+			// target location.
 		} else if (cx > tx) {
 
 			if (counter == 0)
 
 				currentDir = "W";
 
-			else
-				if (counter < 10){
+			else if (counter < 10) {
 
-					if (isValidMovement(scanMapTiles, currentDir) && currentDir == "E"){
-						if(counter1 < 5){
-							if (isValidMovement(scanMapTiles, currentDir)){
+				if (isValidMovement(scanMapTiles, currentDir) && currentDir == "E") {
+					if (counter1 < 5) {
+						if (isValidMovement(scanMapTiles, currentDir)) {
 
-								currentDir = currentDir;
-								counter++;
-								counter1++;
-							}
-						}
-						else{
-
+							currentDir = currentDir;
 							counter++;
-							counter1=0;
-							currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
+							counter1++;
 						}
-					}
+					} else {
 
-					else if (isValidMovement(scanMapTiles, currentDir)){
-
-						currentDir = currentDir;
 						counter++;
-					}
-					else{
-
+						counter1 = 0;
 						currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
-						counter++;
-
 					}
+				}
 
-				}else
+				else if (isValidMovement(scanMapTiles, currentDir)) {
 
-					counter=0;
+					currentDir = currentDir;
+					counter++;
+				} else {
 
-			// if the rover current location locates on the up side of the target location.
+					currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
+					counter++;
+
+				}
+
+			} else
+
+				counter = 0;
+
+			// if the rover current location locates on the up side of the
+			// target location.
 		} else if (cy < ty) {
 
 			if (counter == 0)
 
 				currentDir = "S";
 
-			else
-				if (counter < 10){
+			else if (counter < 10) {
 
-					if (isValidMovement(scanMapTiles, currentDir) && currentDir == "N"){
-						if(counter1 < 5){
-							if (isValidMovement(scanMapTiles, currentDir)){
+				if (isValidMovement(scanMapTiles, currentDir) && currentDir == "N") {
+					if (counter1 < 5) {
+						if (isValidMovement(scanMapTiles, currentDir)) {
 
-								currentDir = currentDir;
-								counter++;
-								counter1++;
-
-							}
-						}
-						else{
-
+							currentDir = currentDir;
 							counter++;
-							counter1=0;
-							currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
+							counter1++;
+
 						}
-					}
+					} else {
 
-					else if (isValidMovement(scanMapTiles, currentDir)){
-
-						currentDir = currentDir;
 						counter++;
-					}
-					else{
-
+						counter1 = 0;
 						currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
-						counter++;
-
 					}
-				}else
+				}
 
-					counter=0;
+				else if (isValidMovement(scanMapTiles, currentDir)) {
+
+					currentDir = currentDir;
+					counter++;
+				} else {
+
+					currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
+					counter++;
+
+				}
+			} else
+
+				counter = 0;
 		}
-		// if the rover current location locates on the down of the target location.
-		else{
+		// if the rover current location locates on the down of the target
+		// location.
+		else {
 
 			if (counter == 0)
 
 				currentDir = "N";
 
-			else
-				if (counter < 10){
+			else if (counter < 10) {
 
-					if (isValidMovement(scanMapTiles, currentDir) && currentDir == "S"){
-						if(counter1 < 5){
-							if (isValidMovement(scanMapTiles, currentDir)){
+				if (isValidMovement(scanMapTiles, currentDir) && currentDir == "S") {
+					if (counter1 < 5) {
+						if (isValidMovement(scanMapTiles, currentDir)) {
 
-								currentDir = currentDir;
-								counter++;
-								counter1++;
-
-							}
-						}
-						else{
-
+							currentDir = currentDir;
 							counter++;
-							counter1=0;
-							currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
+							counter1++;
+
 						}
-					}
+					} else {
 
-					else if (isValidMovement(scanMapTiles, currentDir)){
-
-						currentDir = currentDir;
 						counter++;
-					}
-					else{
-
+						counter1 = 0;
 						currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
-						counter++;
-
 					}
+				}
 
-				}else
+				else if (isValidMovement(scanMapTiles, currentDir)) {
 
-					counter=0;
+					currentDir = currentDir;
+					counter++;
+				} else {
+
+					currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
+					counter++;
+
+				}
+
+			} else
+
+				counter = 0;
 		}
 
-		// If it's valid direction move the rover, collect science, detect and share science with other rovers.
+		// If it's valid direction move the rover, collect science, detect and
+		// share science with other rovers.
 		if (isValidMovement(scanMapTiles, currentDir)) {
 
 			move(currentDir);
 
-
-			collectScience(scanMapTiles , centerIndex);
+			collectScience(scanMapTiles, centerIndex);
 
 			rocom.detectAndShare(scanMap.getScanMap(), Rover_Current_Loc, 3);
 
 		} else {
 
-			// If it's not valid direction change the direction randomly until find a unblocked direction. then move the rover, collect science, detect and share science with other rovers.
+			// If it's not valid direction change the direction randomly until
+			// find a unblocked direction. then move the rover, collect science,
+			// detect and share science with other rovers.
 
 			while (!isValidMovement(scanMapTiles, currentDir)) {
 
@@ -664,20 +603,19 @@ public class ROVER_04 {
 
 			}
 
-			counter ++;
+			counter++;
 
 			move(currentDir);
 
-			collectScience(scanMapTiles , centerIndex);
+			collectScience(scanMapTiles, centerIndex);
 
 			rocom.detectAndShare(scanMap.getScanMap(), Rover_Current_Loc, 3);
-
 
 		}
 
 	}
 
-	//Check validation of next movement of the rover.
+	// Check validation of next movement of the rover.
 
 	public Boolean isValidMovement(MapTile[][] scanMapTiles, String currentDir) {
 
@@ -730,9 +668,8 @@ public class ROVER_04 {
 
 	}
 
-
-
-	// this function will move the rover randomly in the east,west,north or south direction.
+	// this function will move the rover randomly in the east,west,north or
+	// south direction.
 
 	public String changeRoverDirection(MapTile[][] scanMapTiles, Coord currentLocation,
 
@@ -745,7 +682,9 @@ public class ROVER_04 {
 		int tx = targetLocation.xpos, ty = targetLocation.ypos;
 
 		Random r = new Random();
-
+		if(cx<tx)
+			return paths.get(r.nextInt(3));
+		else
 		return paths.get(r.nextInt(4));
 
 	}
@@ -757,12 +696,12 @@ public class ROVER_04 {
 
 	}
 
-	// ################################################### Support Methods ###########################################/
+	// ################################################### Support Methods
+	// ###########################################/
 
 	private void clearReadLineBuffer() throws IOException {
 
 		while (in.ready()) {
-
 
 			in.readLine();
 
@@ -770,14 +709,15 @@ public class ROVER_04 {
 
 	}
 
-	// Check if there is mineral science or not, if there is, send gather request to the server.
-	public void collectScience(MapTile[][] scanMapTiles , int centerIndex) {
+	// Check if there is mineral science or not, if there is, send gather
+	// request to the server.
+	public void collectScience(MapTile[][] scanMapTiles, int centerIndex) {
 
 		System.out.println("ROVER_04: scanMapTiles[centerIndex][centerIndex].getScience().getSciString() "
 
-+ scanMapTiles[centerIndex][centerIndex]
+				+ scanMapTiles[centerIndex][centerIndex]
 
-		.getScience().getSciString());
+						.getScience().getSciString());
 
 		if (!scanMapTiles[centerIndex][centerIndex].getScience()
 
@@ -787,13 +727,14 @@ public class ROVER_04 {
 
 			out.println("GATHER");
 
-		}	}
+		}
+	}
 
-	//detecting mineral
+	// detecting mineral
 
-	public void detectMineral(MapTile[][] scanMapTiles, Coord currentLoc) 
+	public void detectMineral(MapTile[][] scanMapTiles, Coord currentLoc)
 
-	{       
+	{
 
 		int centerIndex = (scanMap.getEdgeSize() - 1) / 2;
 
@@ -806,13 +747,16 @@ public class ROVER_04 {
 		for (int x = 0; x < scanMapTiles.length; x++) {
 			for (int y = 0; y < scanMapTiles.length; y++) {
 
-				if (scanMapTiles[x][y].getScience() == Science.MINERAL) 
+				if (scanMapTiles[x][y].getScience() == Science.MINERAL)
 
 				{
 
-					// Collect the mineral in rock and gravel which because our rover has drill with radar_sensor.
+					// Collect the mineral in rock and gravel which because our
+					// rover has drill with radar_sensor.
 
-					if( scanMapTiles[x][y].getTerrain() == Terrain.ROCK || scanMapTiles[x][y].getTerrain() == Terrain.GRAVEL || scanMapTiles[x][y].getTerrain() == Terrain.SOIL)
+					if (scanMapTiles[x][y].getTerrain() == Terrain.ROCK
+							|| scanMapTiles[x][y].getTerrain() == Terrain.GRAVEL
+							|| scanMapTiles[x][y].getTerrain() == Terrain.SOIL)
 
 					{
 						scienceInXPos = xPosition + x;
@@ -845,7 +789,8 @@ public class ROVER_04 {
 
 		out.println("EQUIPMENT");
 
-		String jsonEqListIn = in.readLine(); // grabs the string that was returned first
+		String jsonEqListIn = in.readLine(); // grabs the string that was
+												// returned first
 
 		if (jsonEqListIn == null) {
 
@@ -886,14 +831,14 @@ public class ROVER_04 {
 
 				new TypeToken<ArrayList<String>>() {
 
-		}.getType());
+				}.getType());
 
 		return returnList;
 
 	}
 
-	
-	// sends a SCAN request to the server and puts the result in the scanMap array
+	// sends a SCAN request to the server and puts the result in the scanMap
+	// array
 
 	public void loadScanMapFromSwarmServer() throws IOException {
 
@@ -919,7 +864,7 @@ public class ROVER_04 {
 
 		System.out.println("ROVER_04 incomming SCAN result - first readline: "
 
-+ jsonScanMapIn);
+				+ jsonScanMapIn);
 
 		if (jsonScanMapIn.startsWith("SCAN")) {
 
@@ -949,9 +894,8 @@ public class ROVER_04 {
 
 	}
 
-
-
-	// this function takes the server response string, parses out the x and x values and returns a Coord object
+	// this function takes the server response string, parses out the x and x
+	// values and returns a Coord object
 
 	public static Coord extractLocation(String sStr) {
 
@@ -976,9 +920,9 @@ public class ROVER_04 {
 	}
 
 	/**
-
+	 * 
 	 * Runs the client
-
+	 * 
 	 */
 
 	public static void main(String[] args) throws Exception {
