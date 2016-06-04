@@ -466,6 +466,7 @@ public class ROVER_04 {
 		// if the rover arrive to the target location.
 		if (tx == cx && cy == ty) { 
 			System.out.println("ROVER_04 reaches target location");
+			counter++;
 			currentDir = changeRoverDirection(scanMapTiles, currentLocation, targetLocation);
 
 			// if the rover current location locates on the left side of the target location.
@@ -478,10 +479,10 @@ public class ROVER_04 {
 
 			}
 			else
-				if (counter < 10){
+				if (counter < 50){
 
 					if (isValidMovement(scanMapTiles, currentDir) && currentDir == "W"){
-						if(counter1 < 5){
+						if(counter1 < 20){
 
 							if (isValidMovement(scanMapTiles, currentDir)){
 
@@ -521,10 +522,10 @@ public class ROVER_04 {
 				currentDir = "W";
 
 			else
-				if (counter < 10){
+				if (counter < 50){
 
 					if (isValidMovement(scanMapTiles, currentDir) && currentDir == "E"){
-						if(counter1 < 5){
+						if(counter1 < 20){
 							if (isValidMovement(scanMapTiles, currentDir)){
 
 								currentDir = currentDir;
@@ -564,10 +565,10 @@ public class ROVER_04 {
 				currentDir = "S";
 
 			else
-				if (counter < 10){
+				if (counter < 50){
 
 					if (isValidMovement(scanMapTiles, currentDir) && currentDir == "N"){
-						if(counter1 < 5){
+						if(counter1 < 20){
 							if (isValidMovement(scanMapTiles, currentDir)){
 
 								currentDir = currentDir;
@@ -607,10 +608,10 @@ public class ROVER_04 {
 				currentDir = "N";
 
 			else
-				if (counter < 10){
+				if (counter < 50){
 
 					if (isValidMovement(scanMapTiles, currentDir) && currentDir == "S"){
-						if(counter1 < 5){
+						if(counter1 < 20){
 							if (isValidMovement(scanMapTiles, currentDir)){
 
 								currentDir = currentDir;
